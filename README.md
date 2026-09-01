@@ -9,11 +9,11 @@ However, following the tutorial as is won't teach me much, because you're just t
 Therefore I have come up with a AI assisted modification of this tutorial format. I am using cpp because it is the language we use for 3d computer vision.
 Also, cpp has gotten better to use over time, because my main pain point (cmake) can now be automated with Claude, leaving the fun programming and debugging to me.
 
-My workflow for this is as follows
+## Workflow
 * Get Claude Fable to read the tutorial link
 * Get it to cut out all the bits that aren't relevant to my goal of learning camera models (i.e material reflection, etc)
 * Get it to break that roadmap down into step by step "assignments" with basic briefs and conceptual explanations, based on the tutorial sections
-* Implement these tasks myself, with no AI help at all
-* Once I'm done, double check with the rendered image in the tutorial to make sure my implementation is good
-* To reiterate, I am not reading the code in the tutorial or getting Claude to help me. I'm implementing it myself to build understanding.
+* Implement these tasks myself, with no AI help at all - occasionally reading the tutorial explanation but avoiding the code
+* Once I'm done, double check with the rendered image in the tutorial to make sure my implementation is good - as well as with Claude generated tests.
+* To reiterate; I do not read the code in the tutorial or get Claude to help me implement it. I'm implementing it myself to build understanding.
 * Read more about my philosophy of AI usage <a href="https://github.com/cravies/dotfiles/blob/main/prompt.md">In this repo</a>
