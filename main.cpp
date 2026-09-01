@@ -8,6 +8,7 @@
 #include "ray.h"
 #include "sphere.h"
 #include "tests.h"
+#include <random>
 
 static double pos_map(const double x) {
     return (x + 1.0) / 2.0;
@@ -48,6 +49,15 @@ static hit_info get_closest_hit(const vec3 &ray_direction, const vec3 &camera_or
     return {.t = closest_t, .hit_sphere = closest_sphere};
 }
 
+static double random_double(const double lower, const double upper) {
+    // https://en.cppreference.com/cpp/numeric/random
+    std::random_device r;
+    std::default_random_engine re(r());
+    std::uniform_real_distribution<double> unif(lower,upper);
+    const double a_random_double = unif(re);
+    return a_random_double;
+}
+
 int main() {
     std::ofstream out("test.ppm");
 
@@ -73,15 +83,8 @@ int main() {
     vec3 top_left_viewport = center_viewport - (width/2.0f) * across_vec - (height/2.0f) * down_vec;
     vec3 top_left_pixel = top_left_viewport + (0.5f * across_vec) + (0.5f * down_vec);
 
-    vec3 ball_center(0, 0, -1);
-    double ball_radius = 0.5;
-    sphere ball(ball_center, ball_radius);
-    // make a lil ground for it to sit on
-    vec3 globe_center(0, -100.5, -1);
-    double globe_radius = 100.0;
-    sphere globe(globe_center, globe_radius);
-
-    std::vector<sphere> spheres = {ball, globe};
+    constexpr int grid_size = 10;
+    std::vector<sphere> spheres = make_scene(viewport_width, grid_size);
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
