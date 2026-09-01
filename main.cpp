@@ -5,6 +5,8 @@
 #include "vec3.h"
 #include "color.h"
 #include "ray.h"
+#include "sphere.h"
+#include "tests.h"
 
 static double pos_map(const double x) {
     return (x + 1.0) / 2.0;
@@ -21,29 +23,6 @@ static color surface_normal_color(const vec3 &surface_normal) {
     double g = pos_map(surface_normal.y());
     double b = pos_map(surface_normal.z());
     return {r, g, b};
-}
-
-double hit_sphere(const vec3 &ray_direction, const vec3 &origin, const vec3 &sphere_center, double radius) {
-    // quadratic equation = (-b +- sqrt(b^2 - 4ac))/2a
-    vec3 to_sphere = sphere_center - origin;
-    double a = dot(ray_direction, ray_direction);
-    double b = -2.0 * dot(ray_direction, to_sphere);
-    double c = dot(sphere_center, sphere_center) - pow(radius, 2.0f);
-    // check if b^2 - 4ac is 0 or positive - implies real solutions
-    // otherwise we get nasty imaginary numbers and we cooked
-    double sqrt_guy = (b*b - 4*a*c);
-    if (sqrt_guy < 0) {
-        // dummy return - no solution
-        return -1.0;
-    }
-    double t_plus = (-b + sqrt(sqrt_guy)) / (2*a);
-    double t_minus = (-b - sqrt(sqrt_guy)) / (2*a);
-    // we want the "closer solution" i.e the front of the sphere (smaller t)
-    // as remember t is the distance along the ray we've travelled...
-    if (fabs(t_plus) < fabs(t_minus)) {
-        return t_plus;
-    }
-    return t_minus;
 }
 
 int main() {
@@ -101,29 +80,6 @@ int main() {
         }
     }
 
-    std::cout << dot(vec3(1,0,0), vec3(0,1,0)) << '\n';    // 0
-    std::cout << dot(vec3(1,2,3), vec3(4,5,6)) << '\n';    // 32
-    std::cout << dot(vec3(1,2,3), vec3(1,2,3)) << '\n';    // 14, matches length_squared
-    std::cout << dot(vec3(2,3,4), vec3(-1,2,-1)) << '\n';  // 0, orthogonal
-    std::cout << dot(vec3(1,1,0), vec3(-1,-1,0)) << '\n';  // -2, anti-aligned
-
-    std::cout << "height " << height << '\n';               // 225
-    std::cout << "vp_width " << viewport_width << '\n';     // 3.55556
-    std::cout << "across " << across_vec << '\n';           // 0.00888889 0 0
-    std::cout << "down " << down_vec << '\n';               // 0 -0.00888889 0
-    std::cout << "top_left_corner " << top_left_viewport << '\n';  // -1.77778 1 -1
-    std::cout << "top_left_pixel " << top_left_pixel << '\n';
-
-    std::cout << ray(point3(0,0,0), vec3(1,2,3)).at(2.0) << '\n';
-    std::cout << ray(point3(1,1,1), vec3(0,0,-1)).at(0.5) << '\n';
-    std::cout << ray(point3(1,1,1), vec3(0,0,-1)).at(0.0) << '\n';
-
-    std::cout << vec3(3,4,0).length() << '\n';                    // 5
-    std::cout << vec3(1,2,3).length_squared() << '\n';            // 14
-    std::cout << vec3(5,7,9) - vec3(1,2,3) << '\n';               // 4 5 6
-    std::cout << vec3(2,4,8) / 2.0 << '\n';                       // 1 2 4
-    std::cout << unit_vector(vec3(0,3,0)) << '\n';                // 0 1 0
-    std::cout << unit_vector(vec3(1,1,1)).length() << '\n';       // 1
-    std::cout << unit_vector(vec3(-2,0,0)) << '\n';               // -1 0 0
+    tests();
     return 0;
 }

@@ -6,6 +6,7 @@
 #define RAYTRACER_VEC3_H
 
 #include <cmath>
+#include <ostream>
 
 class vec3 {
 
