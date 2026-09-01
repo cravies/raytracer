@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <cmath>
+#include <vector>
 
 #include "vec3.h"
 #include "color.h"
@@ -23,6 +24,28 @@ static color surface_normal_color(const vec3 &surface_normal) {
     double g = pos_map(surface_normal.y());
     double b = pos_map(surface_normal.z());
     return {r, g, b};
+}
+
+struct hit_info {
+    double t{};
+    sphere hit_sphere;
+};
+
+static hit_info get_closest_hit(const vec3 &ray_direction, const vec3 &camera_origin, const std::vector<sphere>& spheres) {
+    double closest_t = -1.0;
+    sphere closest_sphere;
+    for (auto& sphere: spheres) {
+        double this_t = hit_sphere(ray_direction, camera_origin, sphere);
+        if (this_t > 0 && closest_t == -1.0) {
+            closest_t = this_t;
+            closest_sphere = sphere;
+        }
+        else if (this_t > 0 && this_t < closest_t) {
+            closest_t = this_t;
+            closest_sphere = sphere;
+        }
+    }
+    return {.t = closest_t, .hit_sphere = closest_sphere};
 }
 
 int main() {
@@ -50,8 +73,16 @@ int main() {
     vec3 top_left_viewport = center_viewport - (width/2.0f) * across_vec - (height/2.0f) * down_vec;
     vec3 top_left_pixel = top_left_viewport + (0.5f * across_vec) + (0.5f * down_vec);
 
-    vec3 sphere_center(0, 0, -1);
-    double sphere_radius = 0.5;
+    vec3 ball_center(0, 0, -1);
+    double ball_radius = 0.5;
+    sphere ball(ball_center, ball_radius);
+    // make a lil ground for it to sit on
+    vec3 globe_center(0, -100.5, -1);
+    double globe_radius = 100.0;
+    sphere globe(globe_center, globe_radius);
+
+    std::vector<sphere> spheres = {ball, globe};
+
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             vec3 pixel = top_left_pixel + (x * across_vec) + (y * down_vec);
@@ -64,13 +95,13 @@ int main() {
             ray pixel_ray(camera_origin, cam_to_pixel);
             vec3 ray_direction = pixel_ray.get_direction();
             color this_pixel;
-            double t = hit_sphere(ray_direction, camera_origin, sphere_center, sphere_radius);
+            auto [t, hit_sphere] = get_closest_hit(ray_direction, camera_origin, spheres);
             if (t != -1.0) {
                 // hit sphere - shade by normal
                 // first build hit point
                 vec3 hit_point = camera_origin + t * ray_direction;
                 this_pixel = color(1.0, 0, 0);
-                vec3 surface_normal = unit_vector(hit_point - sphere_center);
+                vec3 surface_normal = unit_vector(hit_point - hit_sphere.center);
                 this_pixel = surface_normal_color(surface_normal);
             } else {
                 // background blending
