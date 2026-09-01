@@ -12,6 +12,18 @@ static color ray_color(const ray& r) {
     return (1 - y_normed) * color(1.0, 1.0, 1.0) + y_normed*color(0.5, 0.7, 1.0);
 }
 
+bool hit_sphere(const vec3 &ray_direction, const vec3 &origin, const vec3 &sphere_center, double radius) {
+    vec3 to_sphere = sphere_center - origin;
+    double a = dot(ray_direction, ray_direction);
+    double b = -2.0 * dot(ray_direction, to_sphere);
+    double c = dot(sphere_center, sphere_center) - pow(radius, 2.0f);
+    // check if b^2 - 4ac is 0 or positive - implies real solutions
+    if ((b*b - 4*a*c)<0) {
+        return false;
+    }
+    return true;
+}
+
 int main() {
     std::ofstream out("test.ppm");
 
@@ -37,6 +49,8 @@ int main() {
     vec3 top_left_viewport = center_viewport - (width/2.0f) * across_vec - (height/2.0f) * down_vec;
     vec3 top_left_pixel = top_left_viewport + (0.5f * across_vec) + (0.5f * down_vec);
 
+    vec3 sphere_center(0, 0, -1);
+    double sphere_radius = 0.5;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             vec3 pixel = top_left_pixel + (x * across_vec) + (y * down_vec);
@@ -47,11 +61,24 @@ int main() {
                 std::cout << cam_to_pixel << std::endl;
             }
             ray pixel_ray(camera_origin, cam_to_pixel);
-            color this_ray_color(ray_color(pixel_ray));
-            color c(this_ray_color);
-            write_color(out, c);
+            vec3 ray_direction = pixel_ray.get_direction();
+            color this_pixel;
+            if (hit_sphere(ray_direction, camera_origin, sphere_center, sphere_radius)) {
+                // hit sphere - aka flat colour
+                this_pixel = color(1.0, 0, 0);
+            } else {
+                // background blending
+                this_pixel = color(ray_color(pixel_ray));
+            }
+            write_color(out, this_pixel);
         }
     }
+
+    std::cout << dot(vec3(1,0,0), vec3(0,1,0)) << '\n';    // 0
+    std::cout << dot(vec3(1,2,3), vec3(4,5,6)) << '\n';    // 32
+    std::cout << dot(vec3(1,2,3), vec3(1,2,3)) << '\n';    // 14, matches length_squared
+    std::cout << dot(vec3(2,3,4), vec3(-1,2,-1)) << '\n';  // 0, orthogonal
+    std::cout << dot(vec3(1,1,0), vec3(-1,-1,0)) << '\n';  // -2, anti-aligned
 
     std::cout << "height " << height << '\n';               // 225
     std::cout << "vp_width " << viewport_width << '\n';     // 3.55556

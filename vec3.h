@@ -36,34 +36,38 @@ class vec3 {
 
 };
 
-inline std::ostream& operator<<(std::ostream& out, const vec3&v){
+inline std::ostream& operator<<(std::ostream& out, const vec3 &v){
     out << v.x() << " " << v.y() << " " << v.z();
     return out;
 }
 
-inline vec3 operator+(const vec3&u, const vec3& v) {
+inline vec3 operator+(const vec3 &u, const vec3 &v) {
     const vec3 result = {u.e[0]+v.e[0], u.e[1]+v.e[1], u.e[2]+v.e[2]};
     return result;
 }
 
-inline vec3 operator-(const vec3&u, const vec3& v) {
+inline vec3 operator-(const vec3 &u, const vec3 &v) {
     const vec3 result = {u.e[0]-v.e[0], u.e[1]-v.e[1], u.e[2]-v.e[2]};
     return result;
 }
 
-inline vec3 operator*(const double t, const vec3&v) {
+inline vec3 operator*(const double t, const vec3 &v) {
     const vec3 result = {v.e[0] * t, v.e[1] * t, v.e[2] * t};
     return result;
 }
 
-inline vec3 operator/(const vec3&v, const double t) {
+inline vec3 operator/(const vec3 &v, const double t) {
     const vec3 result = {v.e[0] / t, v.e[1] / t, v.e[2] / t};
     return result;
 }
 
-inline vec3 unit_vector(const vec3& v) {
+inline vec3 unit_vector(const vec3 &v) {
     auto v_norm = v.length();
     return v / v_norm;
+}
+
+inline double dot(const vec3 &u, const vec3 &v) {
+    return u.x()*v.x() + u.y()*v.y() + u.z()*v.z();
 }
 
 using point3=vec3;
