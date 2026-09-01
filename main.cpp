@@ -6,22 +6,44 @@
 #include "color.h"
 #include "ray.h"
 
+static double pos_map(const double x) {
+    return (x + 1.0) / 2.0;
+}
+
 static color ray_color(const ray& r) {
     const vec3 unit_ray = unit_vector(r.get_direction());
-    const double y_normed = (unit_ray.y() + 1.0) / 2.0;
+    const double y_normed = pos_map(unit_ray.y());
     return (1 - y_normed) * color(1.0, 1.0, 1.0) + y_normed*color(0.5, 0.7, 1.0);
 }
 
-bool hit_sphere(const vec3 &ray_direction, const vec3 &origin, const vec3 &sphere_center, double radius) {
+static color surface_normal_color(const vec3 &surface_normal) {
+    double r = pos_map(surface_normal.x());
+    double g = pos_map(surface_normal.y());
+    double b = pos_map(surface_normal.z());
+    return {r, g, b};
+}
+
+double hit_sphere(const vec3 &ray_direction, const vec3 &origin, const vec3 &sphere_center, double radius) {
+    // quadratic equation = (-b +- sqrt(b^2 - 4ac))/2a
     vec3 to_sphere = sphere_center - origin;
     double a = dot(ray_direction, ray_direction);
     double b = -2.0 * dot(ray_direction, to_sphere);
     double c = dot(sphere_center, sphere_center) - pow(radius, 2.0f);
     // check if b^2 - 4ac is 0 or positive - implies real solutions
-    if ((b*b - 4*a*c)<0) {
-        return false;
+    // otherwise we get nasty imaginary numbers and we cooked
+    double sqrt_guy = (b*b - 4*a*c);
+    if (sqrt_guy < 0) {
+        // dummy return - no solution
+        return -1.0;
     }
-    return true;
+    double t_plus = (-b + sqrt(sqrt_guy)) / (2*a);
+    double t_minus = (-b - sqrt(sqrt_guy)) / (2*a);
+    // we want the "closer solution" i.e the front of the sphere (smaller t)
+    // as remember t is the distance along the ray we've travelled...
+    if (fabs(t_plus) < fabs(t_minus)) {
+        return t_plus;
+    }
+    return t_minus;
 }
 
 int main() {
@@ -63,9 +85,14 @@ int main() {
             ray pixel_ray(camera_origin, cam_to_pixel);
             vec3 ray_direction = pixel_ray.get_direction();
             color this_pixel;
-            if (hit_sphere(ray_direction, camera_origin, sphere_center, sphere_radius)) {
-                // hit sphere - aka flat colour
+            double t = hit_sphere(ray_direction, camera_origin, sphere_center, sphere_radius);
+            if (t != -1.0) {
+                // hit sphere - shade by normal
+                // first build hit point
+                vec3 hit_point = camera_origin + t * ray_direction;
                 this_pixel = color(1.0, 0, 0);
+                vec3 surface_normal = unit_vector(hit_point - sphere_center);
+                this_pixel = surface_normal_color(surface_normal);
             } else {
                 // background blending
                 this_pixel = color(ray_color(pixel_ray));
