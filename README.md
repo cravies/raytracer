@@ -14,6 +14,4 @@ Therefore I have come up with a AI assisted modification of this tutorial format
 * Implement these tasks myself, with no AI help at all - occasionally reading the tutorial explanation but avoiding looking at the tutorial code
 * Once I'm done, double check with the rendered image in the tutorial to make sure my implementation is good - as well as with Claude generated tests.
 * To reiterate; I do not read the code in the tutorial or get Claude to help me implement it. I'm implementing it myself to build understanding.
-* In the few instances that I used Claude to fix a bug, this will be clearly marked, and I tried to avoid this at all costs 
-* Example exception; wanting to finish a feature before home-time at 5, use Claude to quickly smash a tiny bug so I can push and go home (this is marked in commit comment)
 * Read more about my philosophy of AI usage <a href="https://github.com/cravies/dotfiles/blob/main/prompt.md">In this repo</a>
